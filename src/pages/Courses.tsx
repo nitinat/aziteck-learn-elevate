@@ -120,7 +120,6 @@ export default function Courses() {
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-primary font-semibold">{course.level}</span>
-                    <span className="text-3xl font-bold text-gradient">{course.price}</span>
                   </div>
                   
                   <h3 className="text-2xl font-bold mb-3">{course.title}</h3>
@@ -152,6 +151,7 @@ export default function Courses() {
                 <Button 
                   className={`w-full ${course.popular ? 'btn-hero' : 'btn-outline-hero'}`}
                   size="lg"
+                  disabled
                 >
                   Enroll Now
                   <ArrowRight className="ml-2 w-4 h-4" />
