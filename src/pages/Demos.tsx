@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
+import { useAuth } from "@/hooks/useAuth"
 import DemoVideoManager from "@/components/admin/DemoVideoManager"
 
 const demos = [
@@ -134,6 +135,7 @@ interface DemoVideo {
 }
 
 export default function Demos() {
+  const { user } = useAuth()
   const [isAdmin, setIsAdmin] = useState(false)
   const [showAdminPanel, setShowAdminPanel] = useState(false)
   const [dbDemos, setDbDemos] = useState<DemoVideo[]>([])
@@ -143,16 +145,17 @@ export default function Demos() {
   useEffect(() => {
     checkAdminStatus()
     fetchDemos()
-  }, [])
+  }, [user])
 
   const checkAdminStatus = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         const { data, error } = await supabase.rpc('is_admin', { user_id: user.id })
         if (!error) {
           setIsAdmin(data)
         }
+      } else {
+        setIsAdmin(false)
       }
     } catch (error) {
       console.error('Error checking admin status:', error)
