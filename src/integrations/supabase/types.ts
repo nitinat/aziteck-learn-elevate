@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      demo_videos: {
+        Row: {
+          category: string
+          code_url: string | null
+          created_at: string
+          created_by: string
+          demo_url: string | null
+          description: string | null
+          display_order: number | null
+          features: string[] | null
+          id: string
+          image_url: string | null
+          is_featured: boolean | null
+          technologies: string[] | null
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          category: string
+          code_url?: string | null
+          created_at?: string
+          created_by: string
+          demo_url?: string | null
+          description?: string | null
+          display_order?: number | null
+          features?: string[] | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          technologies?: string[] | null
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          category?: string
+          code_url?: string | null
+          created_at?: string
+          created_by?: string
+          demo_url?: string | null
+          description?: string | null
+          display_order?: number | null
+          features?: string[] | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          technologies?: string[] | null
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       formula_bookmarks: {
         Row: {
           bookmark_type: string | null

@@ -1,6 +1,9 @@
-import { ExternalLink, Play, Code, Database, BarChart3, Users, BookOpen, Building2 } from "lucide-react"
+import { ExternalLink, Play, Code, Database, BarChart3, Users, BookOpen, Building2, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useState, useEffect } from "react"
+import { supabase } from "@/integrations/supabase/client"
+import DemoVideoManager from "@/components/admin/DemoVideoManager"
 
 const demos = [
   {
@@ -18,6 +21,7 @@ const demos = [
     image: "/api/placeholder/600/400",
     demoUrl: "#",
     codeUrl: "#",
+    videoUrl: null,
     icon: Users
   },
   {
@@ -35,6 +39,7 @@ const demos = [
     image: "/api/placeholder/600/400",
     demoUrl: "#",
     codeUrl: "#",
+    videoUrl: null,
     icon: BookOpen
   },
   {
@@ -52,6 +57,7 @@ const demos = [
     image: "/api/placeholder/600/400",
     demoUrl: "#",
     codeUrl: "#",
+    videoUrl: null,
     icon: Building2
   },
   {
@@ -69,6 +75,7 @@ const demos = [
     image: "/api/placeholder/600/400",
     demoUrl: "#",
     codeUrl: "#",
+    videoUrl: null,
     icon: BarChart3
   },
   {
@@ -86,6 +93,7 @@ const demos = [
     image: "/api/placeholder/600/400",
     demoUrl: "#",
     codeUrl: "#",
+    videoUrl: null,
     icon: Database
   },
   {
@@ -103,32 +111,147 @@ const demos = [
     image: "/api/placeholder/600/400",
     demoUrl: "#",
     codeUrl: "#",
+    videoUrl: null,
     icon: Users
   }
 ]
 
 const categories = ["All", "Business Intelligence", "Education Technology", "Enterprise Software", "Artificial Intelligence", "Supply Chain", "Natural Language Processing"]
 
+interface DemoVideo {
+  id: string
+  title: string
+  description: string | null
+  category: string
+  technologies: string[]
+  features: string[]
+  video_url: string | null
+  demo_url: string | null
+  code_url: string | null
+  image_url: string | null
+  is_featured: boolean
+  display_order: number
+}
+
 export default function Demos() {
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [showAdminPanel, setShowAdminPanel] = useState(false)
+  const [dbDemos, setDbDemos] = useState<DemoVideo[]>([])
+  const [selectedCategory, setSelectedCategory] = useState("All")
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    checkAdminStatus()
+    fetchDemos()
+  }, [])
+
+  const checkAdminStatus = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data, error } = await supabase.rpc('is_admin', { user_id: user.id })
+        if (!error) {
+          setIsAdmin(data)
+        }
+      }
+    } catch (error) {
+      console.error('Error checking admin status:', error)
+    }
+  }
+
+  const fetchDemos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('demo_videos')
+        .select('*')
+        .order('display_order', { ascending: true })
+
+      if (error) throw error
+      setDbDemos(data || [])
+    } catch (error) {
+      console.error('Error fetching demos:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Combine static demos with database demos
+  const allDemos = [...demos, ...dbDemos.map(dbDemo => ({
+    title: dbDemo.title,
+    description: dbDemo.description || "",
+    category: dbDemo.category,
+    technologies: dbDemo.technologies,
+    features: dbDemo.features,
+    image: dbDemo.image_url || "/api/placeholder/600/400",
+    demoUrl: dbDemo.demo_url || "#",
+    codeUrl: dbDemo.code_url || "#",
+    videoUrl: dbDemo.video_url,
+    icon: Database // Default icon for DB demos
+  }))]
+
+  // Get all categories including database demo categories
+  const allCategories = [
+    "All",
+    ...new Set([
+      ...categories.slice(1), // Exclude "All" from static categories
+      ...dbDemos.map(demo => demo.category)
+    ])
+  ]
+
+  // Filter demos based on selected category
+  const filteredDemos = selectedCategory === "All" 
+    ? allDemos 
+    : allDemos.filter(demo => demo.category === selectedCategory)
+
+  if (showAdminPanel && isAdmin) {
+    return (
+      <div className="min-h-screen pt-20">
+        <div className="section-container py-8">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold">Admin Panel - Demo Videos</h1>
+            <Button variant="outline" onClick={() => setShowAdminPanel(false)}>
+              Back to Demos
+            </Button>
+          </div>
+          <DemoVideoManager />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen pt-20">
       {/* Header */}
       <section className="py-16 bg-gradient-to-r from-primary/5 via-background to-secondary/5">
         <div className="section-container text-center">
-          <h1 className="text-5xl font-bold mb-6">
-            <span className="text-gradient">Live Demos & Showcases</span>
-          </h1>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-5xl font-bold">
+              <span className="text-gradient">Live Demos & Showcases</span>
+            </h1>
+            {isAdmin && (
+              <Button 
+                onClick={() => setShowAdminPanel(true)}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Settings className="w-4 h-4" />
+                Manage Demos
+              </Button>
+            )}
+          </div>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
             Explore our portfolio of real-world applications built by our students and used by actual businesses. Try live demos and see the code behind each project.
           </p>
           
           {/* Category filters */}
           <div className="flex flex-wrap justify-center gap-2 mt-8">
-            {categories.map((category) => (
+            {allCategories.map((category) => (
               <Badge 
                 key={category} 
-                variant={category === "All" ? "default" : "secondary"}
+                variant={category === selectedCategory ? "default" : "secondary"}
                 className="cursor-pointer hover:scale-105 transition-transform duration-200"
+                onClick={() => setSelectedCategory(category)}
               >
                 {category}
               </Badge>
@@ -140,17 +263,31 @@ export default function Demos() {
       {/* Demos Grid */}
       <section className="py-20">
         <div className="section-container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {demos.map((demo, index) => (
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Loading demos...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {filteredDemos.map((demo, index) => (
               <div key={index} className="card-interactive p-0 overflow-hidden group">
                 {/* Demo Image/Preview */}
                 <div className="relative bg-gradient-to-br from-primary/10 to-secondary/10 h-48 flex items-center justify-center">
                   <demo.icon className="w-16 h-16 text-primary/60" />
                   <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <Button size="lg" variant="secondary" className="animate-scale-in">
-                      <Play className="w-5 h-5 mr-2" />
-                      Try Demo
-                    </Button>
+                    {demo.videoUrl ? (
+                      <Button size="lg" variant="secondary" className="animate-scale-in" asChild>
+                        <a href={demo.videoUrl} target="_blank" rel="noopener noreferrer">
+                          <Play className="w-5 h-5 mr-2" />
+                          Watch Video
+                        </a>
+                      </Button>
+                    ) : (
+                      <Button size="lg" variant="secondary" className="animate-scale-in">
+                        <Play className="w-5 h-5 mr-2" />
+                        Try Demo
+                      </Button>
+                    )}
                   </div>
                 </div>
                 
@@ -204,19 +341,30 @@ export default function Demos() {
                   
                   {/* Action buttons */}
                   <div className="flex gap-2">
-                    <Button size="sm" className="flex-1 btn-hero">
-                      <Play className="w-4 h-4 mr-2" />
-                      Live Demo
+                    <Button size="sm" className="flex-1 btn-hero" asChild>
+                      <a href={demo.demoUrl} target="_blank" rel="noopener noreferrer">
+                        <Play className="w-4 h-4 mr-2" />
+                        Live Demo
+                      </a>
                     </Button>
-                    <Button size="sm" variant="outline" className="flex-1">
-                      <Code className="w-4 h-4 mr-2" />
-                      View Code
+                    <Button size="sm" variant="outline" className="flex-1" asChild>
+                      <a href={demo.codeUrl} target="_blank" rel="noopener noreferrer">
+                        <Code className="w-4 h-4 mr-2" />
+                        View Code
+                      </a>
                     </Button>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+          
+          {filteredDemos.length === 0 && !loading && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No demos found for the selected category.</p>
+            </div>
+          )}
         </div>
       </section>
 
