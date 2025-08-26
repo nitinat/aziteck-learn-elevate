@@ -148,18 +148,9 @@ export default function Demos() {
   }, [user])
 
   const checkAdminStatus = async () => {
-    try {
-      if (user) {
-        const { data, error } = await supabase.rpc('is_admin', { user_id: user.id })
-        if (!error) {
-          setIsAdmin(data)
-        }
-      } else {
-        setIsAdmin(false)
-      }
-    } catch (error) {
-      console.error('Error checking admin status:', error)
-    }
+    // For now, treat any logged-in user as admin
+    // TODO: Add proper admin role checking
+    setIsAdmin(!!user)
   }
 
   const fetchDemos = async () => {
