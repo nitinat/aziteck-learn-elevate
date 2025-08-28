@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       demo_videos: {
         Row: {
+          additional_media: string | null
           category: string
           code_url: string | null
           created_at: string
@@ -24,15 +25,19 @@ export type Database = {
           description: string | null
           display_order: number | null
           features: string[] | null
+          gif_url: string | null
           id: string
           image_url: string | null
           is_featured: boolean | null
+          media_type: string | null
+          slides_url: string | null
           technologies: string[] | null
           title: string
           updated_at: string
           video_url: string | null
         }
         Insert: {
+          additional_media?: string | null
           category: string
           code_url?: string | null
           created_at?: string
@@ -41,15 +46,19 @@ export type Database = {
           description?: string | null
           display_order?: number | null
           features?: string[] | null
+          gif_url?: string | null
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
+          media_type?: string | null
+          slides_url?: string | null
           technologies?: string[] | null
           title: string
           updated_at?: string
           video_url?: string | null
         }
         Update: {
+          additional_media?: string | null
           category?: string
           code_url?: string | null
           created_at?: string
@@ -58,9 +67,12 @@ export type Database = {
           description?: string | null
           display_order?: number | null
           features?: string[] | null
+          gif_url?: string | null
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
+          media_type?: string | null
+          slides_url?: string | null
           technologies?: string[] | null
           title?: string
           updated_at?: string
