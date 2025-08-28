@@ -162,6 +162,7 @@ export default function Demos() {
         .order('display_order', { ascending: true })
 
       if (error) throw error
+      console.log('Fetched demos:', data) // Debug log to see the data
       setDbDemos(data || [])
     } catch (error) {
       console.error('Error fetching demos:', error)
@@ -322,8 +323,24 @@ export default function Demos() {
                 )}
                 
                 {/* Demo Image/Preview */}
-                <div className="relative bg-gradient-to-br from-primary/10 to-secondary/10 h-48 flex items-center justify-center">
-                  <demo.icon className="w-16 h-16 text-primary/60" />
+                <div className="relative bg-gradient-to-br from-primary/10 to-secondary/10 h-48 overflow-hidden">
+                  {demo.image && demo.image !== "/api/placeholder/600/400" ? (
+                    <img 
+                      src={demo.image} 
+                      alt={demo.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback to icon if image fails to load
+                        const img = e.currentTarget as HTMLImageElement;
+                        const iconDiv = img.nextElementSibling as HTMLElement;
+                        img.style.display = 'none';
+                        if (iconDiv) iconDiv.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div className={`absolute inset-0 flex items-center justify-center ${demo.image && demo.image !== "/api/placeholder/600/400" ? 'hidden' : ''}`}>
+                    <demo.icon className="w-16 h-16 text-primary/60" />
+                  </div>
                   <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     {demo.videoUrl ? (
                       <Button size="lg" variant="secondary" className="animate-scale-in" asChild>
