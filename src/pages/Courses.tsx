@@ -140,7 +140,7 @@ export default function Courses() {
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-primary font-semibold">{level.level}</span>
-                    <span className="text-2xl font-bold text-primary">{level.price}</span>
+                    {/* <span className="text-2xl font-bold text-primary">{level.price}</span> */}
                   </div>
                   
                   <h3 className="text-2xl font-bold mb-3">{level.title}</h3>
@@ -225,9 +225,9 @@ export default function Courses() {
                       <div className="text-sm text-muted-foreground mb-2">
                         Projects: {level.projectCount}
                       </div>
-                      <div className="text-lg font-bold text-primary">
+                      {/* <div className="text-lg font-bold text-primary">
                         {level.price}
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                   
