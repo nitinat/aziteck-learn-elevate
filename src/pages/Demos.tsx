@@ -223,17 +223,29 @@ export default function Demos() {
               <span className="text-gradient">Live Demos & Showcases</span>
             </h1>
             {isAdmin && (
-              <Button 
-                onClick={() => setShowAdminPanel(true)}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <Settings className="w-4 h-4" />
-                Manage Demos
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => setShowAdminPanel(true)}
+                  className="btn-hero flex items-center gap-2"
+                >
+                  <Settings className="w-4 h-4" />
+                  Admin Panel
+                </Button>
+                {user && (
+                  <Badge variant="outline" className="px-3 py-1">
+                    Admin Mode
+                  </Badge>
+                )}
+              </div>
             )}
           </div>
+          {!user && (
+            <div className="bg-muted/50 border border-border rounded-lg p-4 mb-6">
+              <p className="text-sm text-muted-foreground">
+                Sign in to access admin features and edit demos
+              </p>
+            </div>
+          )}
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
             Explore our portfolio of real-world applications built by our students and used by actual businesses. Try live demos and see the code behind each project.
           </p>
@@ -264,7 +276,22 @@ export default function Demos() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {filteredDemos.map((demo, index) => (
-              <div key={index} className="card-interactive p-0 overflow-hidden group">
+              <div key={index} className="card-interactive p-0 overflow-hidden group relative">
+                {/* Admin Edit Button */}
+                {isAdmin && (
+                  <div className="absolute top-2 right-2 z-10">
+                    <Button 
+                      size="sm" 
+                      variant="secondary" 
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      onClick={() => setShowAdminPanel(true)}
+                    >
+                      <Settings className="w-4 h-4 mr-1" />
+                      Edit
+                    </Button>
+                  </div>
+                )}
+                
                 {/* Demo Image/Preview */}
                 <div className="relative bg-gradient-to-br from-primary/10 to-secondary/10 h-48 flex items-center justify-center">
                   <demo.icon className="w-16 h-16 text-primary/60" />
