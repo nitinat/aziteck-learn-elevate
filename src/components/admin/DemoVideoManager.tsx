@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Plus, Edit, Trash2, Video, Save, X } from "lucide-react"
+import { Plus, Edit, Trash2, Video, Save, X, Upload, Image, FileText, Presentation } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 
@@ -37,6 +38,10 @@ interface DemoVideoForm {
   demo_url: string
   code_url: string
   image_url: string
+  gif_url: string
+  slides_url: string
+  additional_media: string
+  media_type: string
   is_featured: boolean
   display_order: number
 }
@@ -58,17 +63,44 @@ export default function DemoVideoManager() {
     demo_url: "",
     code_url: "",
     image_url: "",
+    gif_url: "",
+    slides_url: "",
+    additional_media: "",
+    media_type: "video",
     is_featured: false,
     display_order: 0
   })
 
+  const [uploading, setUploading] = useState(false)
+  const [selectedFiles, setSelectedFiles] = useState<{ [key: string]: File | null }>({
+    image: null,
+    video: null,
+    gif: null,
+    slides: null
+  })
+
   const categories = [
+    "Data Analysis",
+    "Data Engineering", 
+    "Data Science",
+    "Machine Learning",
+    "Full Stack Development",
+    "Python Development",
+    "Database & SQL",
+    "Deployment & DevOps",
     "Business Intelligence",
     "Education Technology", 
     "Enterprise Software",
     "Artificial Intelligence",
     "Supply Chain",
     "Natural Language Processing"
+  ]
+
+  const mediaTypes = [
+    { value: "video", label: "Video Demo", icon: Video },
+    { value: "image", label: "Image Gallery", icon: Image },
+    { value: "slides", label: "Animated Slides", icon: Presentation },
+    { value: "gif", label: "GIF Animation", icon: FileText }
   ]
 
   useEffect(() => {
@@ -95,8 +127,65 @@ export default function DemoVideoManager() {
     }
   }
 
+  const uploadFile = async (file: File, path: string): Promise<string> => {
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${Date.now()}.${fileExt}`
+    const filePath = `${path}/${fileName}`
+
+    const { error } = await supabase.storage
+      .from('learning-materials')
+      .upload(filePath, file)
+
+    if (error) throw error
+
+    const { data } = supabase.storage
+      .from('learning-materials')
+      .getPublicUrl(filePath)
+
+    return data.publicUrl
+  }
+
+  const handleFileUpload = async (type: string, file: File) => {
+    setUploading(true)
+    try {
+      const url = await uploadFile(file, `demos/${type}`)
+      
+      switch (type) {
+        case 'image':
+          setFormData(prev => ({ ...prev, image_url: url }))
+          break
+        case 'gif':
+          setFormData(prev => ({ ...prev, gif_url: url }))
+          break
+        case 'slides':
+          setFormData(prev => ({ ...prev, slides_url: url }))
+          break
+        case 'video':
+          setFormData(prev => ({ ...prev, video_url: url }))
+          break
+      }
+      
+      toast({ title: "Success", description: `${type} uploaded successfully` })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to upload ${type}`,
+        variant: "destructive"
+      })
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Upload any selected files first
+    for (const [type, file] of Object.entries(selectedFiles)) {
+      if (file) {
+        await handleFileUpload(type, file)
+      }
+    }
     
     const demoData = {
       ...formData,
@@ -113,14 +202,14 @@ export default function DemoVideoManager() {
           .eq('id', editingId)
 
         if (error) throw error
-        toast({ title: "Success", description: "Demo video updated successfully" })
+        toast({ title: "Success", description: "Demo updated successfully" })
       } else {
         const { error } = await supabase
           .from('demo_videos')
           .insert([demoData])
 
         if (error) throw error
-        toast({ title: "Success", description: "Demo video created successfully" })
+        toast({ title: "Success", description: "Demo created successfully" })
       }
 
       resetForm()
@@ -128,7 +217,7 @@ export default function DemoVideoManager() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to save demo video",
+        description: "Failed to save demo",
         variant: "destructive"
       })
     }
@@ -145,6 +234,10 @@ export default function DemoVideoManager() {
       demo_url: demo.demo_url || "",
       code_url: demo.code_url || "",
       image_url: demo.image_url || "",
+      gif_url: "",
+      slides_url: "",
+      additional_media: "",
+      media_type: demo.video_url ? "video" : demo.image_url ? "image" : "video",
       is_featured: demo.is_featured,
       display_order: demo.display_order
     })
@@ -184,8 +277,18 @@ export default function DemoVideoManager() {
       demo_url: "",
       code_url: "",
       image_url: "",
+      gif_url: "",
+      slides_url: "",
+      additional_media: "",
+      media_type: "video",
       is_featured: false,
       display_order: 0
+    })
+    setSelectedFiles({
+      image: null,
+      video: null,
+      gif: null,
+      slides: null
     })
     setEditingId(null)
     setShowForm(false)
@@ -198,10 +301,10 @@ export default function DemoVideoManager() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold">Demo Videos Management</h2>
+        <h2 className="text-3xl font-bold">Demo Management</h2>
         <Button onClick={() => setShowForm(true)} className="btn-hero">
           <Plus className="w-4 h-4 mr-2" />
-          Add Demo Video
+          Add Demo
         </Button>
       </div>
 
@@ -209,14 +312,15 @@ export default function DemoVideoManager() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>{editingId ? 'Edit' : 'Add'} Demo Video</span>
+              <span>{editingId ? 'Edit' : 'Add'} Demo</span>
               <Button variant="ghost" size="sm" onClick={resetForm}>
                 <X className="w-4 h-4" />
               </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Basic Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="title">Title *</Label>
@@ -286,26 +390,116 @@ export default function DemoVideoManager() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="video_url">Video URL</Label>
-                  <Input
-                    id="video_url"
-                    value={formData.video_url}
-                    onChange={(e) => setFormData(prev => ({ ...prev, video_url: e.target.value }))}
-                    placeholder="https://youtube.com/..."
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="image_url">Image URL</Label>
-                  <Input
-                    id="image_url"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                    placeholder="https://example.com/image.jpg"
-                  />
+              {/* Media Type Selection */}
+              <div>
+                <Label>Demo Type</Label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                  {mediaTypes.map((type) => {
+                    const IconComponent = type.icon
+                    return (
+                      <Button
+                        key={type.value}
+                        type="button"
+                        variant={formData.media_type === type.value ? "default" : "outline"}
+                        className="h-auto p-3 flex-col gap-2"
+                        onClick={() => setFormData(prev => ({ ...prev, media_type: type.value }))}
+                      >
+                        <IconComponent className="w-4 h-4" />
+                        <span className="text-xs">{type.label}</span>
+                      </Button>
+                    )
+                  })}
                 </div>
               </div>
+
+              {/* Media Upload Tabs */}
+              <Tabs defaultValue="urls" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="urls">URLs</TabsTrigger>
+                  <TabsTrigger value="upload">File Upload</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="urls" className="space-y-4">
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="video_url">Video URL</Label>
+                      <Input
+                        id="video_url"
+                        value={formData.video_url}
+                        onChange={(e) => setFormData(prev => ({ ...prev, video_url: e.target.value }))}
+                        placeholder="https://youtube.com/..."
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="image_url">Image URL</Label>
+                      <Input
+                        id="image_url"
+                        value={formData.image_url}
+                        onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
+                        placeholder="https://example.com/image.jpg"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="gif_url">GIF URL</Label>
+                      <Input
+                        id="gif_url"
+                        value={formData.gif_url}
+                        onChange={(e) => setFormData(prev => ({ ...prev, gif_url: e.target.value }))}
+                        placeholder="https://example.com/animation.gif"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="slides_url">Slides URL</Label>
+                      <Input
+                        id="slides_url"
+                        value={formData.slides_url}
+                        onChange={(e) => setFormData(prev => ({ ...prev, slides_url: e.target.value }))}
+                        placeholder="https://slides.com/..."
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="upload" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(selectedFiles).map(([type, file]) => (
+                      <div key={type} className="space-y-2">
+                        <Label htmlFor={`${type}_file`}>
+                          {type.charAt(0).toUpperCase() + type.slice(1)} File
+                        </Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id={`${type}_file`}
+                            type="file"
+                            accept={type === 'video' ? 'video/*' : type === 'gif' ? '.gif' : 'image/*'}
+                            onChange={(e) => {
+                              const selectedFile = e.target.files?.[0] || null
+                              setSelectedFiles(prev => ({ ...prev, [type]: selectedFile }))
+                            }}
+                            className="flex-1"
+                          />
+                          {file && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleFileUpload(type, file)}
+                              disabled={uploading}
+                            >
+                              <Upload className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                        {file && <p className="text-sm text-muted-foreground">{file.name}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+              </Tabs>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -338,9 +532,9 @@ export default function DemoVideoManager() {
               </div>
 
               <div className="flex gap-2 pt-4">
-                <Button type="submit" className="btn-hero">
+                <Button type="submit" className="btn-hero" disabled={uploading}>
                   <Save className="w-4 h-4 mr-2" />
-                  {editingId ? 'Update' : 'Create'} Demo Video
+                  {uploading ? 'Uploading...' : editingId ? 'Update' : 'Create'} Demo
                 </Button>
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Cancel
@@ -421,7 +615,7 @@ export default function DemoVideoManager() {
         {demos.length === 0 && (
           <Card>
             <CardContent className="p-6 text-center">
-              <p className="text-muted-foreground">No demo videos found. Create your first demo video!</p>
+              <p className="text-muted-foreground">No demos found. Create your first demo!</p>
             </CardContent>
           </Card>
         )}
