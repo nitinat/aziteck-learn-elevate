@@ -205,7 +205,11 @@ export default function DemoVideoManager({ editingDemo, onDemoUpdated }: DemoVid
     }
 
     try {
-      if (editingId) {
+      // Check if we're editing a static demo (has "static-" prefix) or a real database demo
+      const isStaticDemo = editingId?.startsWith('static-')
+      
+      if (editingId && !isStaticDemo) {
+        // Update existing database demo
         const { error } = await supabase
           .from('demo_videos')
           .update(demoData)
@@ -214,12 +218,18 @@ export default function DemoVideoManager({ editingDemo, onDemoUpdated }: DemoVid
         if (error) throw error
         toast({ title: "Success", description: "Demo updated successfully" })
       } else {
+        // Create new demo (either new or converting static to database)
         const { error } = await supabase
           .from('demo_videos')
           .insert([demoData])
 
         if (error) throw error
-        toast({ title: "Success", description: "Demo created successfully" })
+        
+        if (isStaticDemo) {
+          toast({ title: "Success", description: "Static demo converted and saved to database" })
+        } else {
+          toast({ title: "Success", description: "Demo created successfully" })
+        }
       }
 
       resetForm()
@@ -545,7 +555,9 @@ export default function DemoVideoManager({ editingDemo, onDemoUpdated }: DemoVid
               <div className="flex gap-2 pt-4">
                 <Button type="submit" className="btn-hero" disabled={uploading}>
                   <Save className="w-4 h-4 mr-2" />
-                  {uploading ? 'Uploading...' : editingId ? 'Update' : 'Create'} Demo
+                  {uploading ? 'Uploading...' : 
+                   editingId?.startsWith('static-') ? 'Convert to Database Demo' :
+                   editingId ? 'Update Demo' : 'Create Demo'}
                 </Button>
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Cancel
