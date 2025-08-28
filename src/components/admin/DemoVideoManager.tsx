@@ -46,7 +46,12 @@ interface DemoVideoForm {
   display_order: number
 }
 
-export default function DemoVideoManager() {
+interface DemoVideoManagerProps {
+  editingDemo?: DemoVideo | null
+  onDemoUpdated?: () => void
+}
+
+export default function DemoVideoManager({ editingDemo, onDemoUpdated }: DemoVideoManagerProps = {}) {
   const [demos, setDemos] = useState<DemoVideo[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -105,7 +110,12 @@ export default function DemoVideoManager() {
 
   useEffect(() => {
     fetchDemos()
-  }, [])
+    
+    // If editingDemo is passed, populate the form
+    if (editingDemo) {
+      handleEdit(editingDemo)
+    }
+  }, [editingDemo])
 
   const fetchDemos = async () => {
     try {
@@ -214,6 +224,7 @@ export default function DemoVideoManager() {
 
       resetForm()
       fetchDemos()
+      onDemoUpdated?.() // Call the callback if provided
     } catch (error) {
       toast({
         title: "Error",

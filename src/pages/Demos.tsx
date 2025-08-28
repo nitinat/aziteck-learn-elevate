@@ -141,6 +141,7 @@ export default function Demos() {
   const [dbDemos, setDbDemos] = useState<DemoVideo[]>([])
   const [selectedCategory, setSelectedCategory] = useState("All")
   const [loading, setLoading] = useState(true)
+  const [editingDemo, setEditingDemo] = useState<any>(null)
 
   useEffect(() => {
     checkAdminStatus()
@@ -197,17 +198,45 @@ export default function Demos() {
     ? allDemos 
     : allDemos.filter(demo => demo.category === selectedCategory)
 
+  const handleEditDemo = (demo: any, index: number) => {
+    // Convert demo to the format expected by DemoVideoManager
+    const demoForEdit = {
+      id: demo.id || `static-${index}`, // Use static ID for static demos
+      title: demo.title,
+      description: demo.description,
+      category: demo.category,
+      technologies: demo.technologies,
+      features: demo.features,
+      video_url: demo.videoUrl,
+      demo_url: demo.demoUrl,
+      code_url: demo.codeUrl,
+      image_url: demo.image || demo.image_url,
+      is_featured: false,
+      display_order: index,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+    setEditingDemo(demoForEdit)
+    setShowAdminPanel(true)
+  }
+
   if (showAdminPanel && isAdmin) {
     return (
       <div className="min-h-screen pt-20">
         <div className="section-container py-8">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold">Admin Panel - Demo Videos</h1>
-            <Button variant="outline" onClick={() => setShowAdminPanel(false)}>
+            <h1 className="text-3xl font-bold">Admin Panel - Demo Management</h1>
+            <Button variant="outline" onClick={() => {
+              setShowAdminPanel(false)
+              setEditingDemo(null)
+            }}>
               Back to Demos
             </Button>
           </div>
-          <DemoVideoManager />
+          <DemoVideoManager editingDemo={editingDemo} onDemoUpdated={() => {
+            setEditingDemo(null)
+            fetchDemos()
+          }} />
         </div>
       </div>
     )
@@ -284,7 +313,7 @@ export default function Demos() {
                       size="sm" 
                       variant="secondary" 
                       className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                      onClick={() => setShowAdminPanel(true)}
+                      onClick={() => handleEditDemo(demo, index)}
                     >
                       <Settings className="w-4 h-4 mr-1" />
                       Edit
