@@ -36,9 +36,11 @@ export function Navigation() {
       <nav className="section-container flex items-center justify-between h-16">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2 group">
-          <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-            <Zap className="w-5 h-5 text-white" />
-          </div>
+          <img 
+            src="/lovable-uploads/d22113df-65c5-4605-8cfa-680327bafd9f.png" 
+            alt="Aziteck Logo" 
+            className="w-8 h-8 group-hover:scale-110 transition-transform duration-300"
+          />
           <span className="text-xl font-bold text-gradient">Aziteck</span>
         </Link>
 
