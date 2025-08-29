@@ -1,6 +1,9 @@
 import { Target, Users, Lightbulb, Award, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
+import { useAdmin } from "@/hooks/useAdmin"
+import TeamMemberEditor from "@/components/admin/TeamMemberEditor"
+import ImpactStatsEditor from "@/components/admin/ImpactStatsEditor"
 
 const values = [
   {
@@ -53,6 +56,8 @@ const team = [
 ]
 
 export default function About() {
+  const { isAdmin } = useAdmin()
+
   return (
     <div className="min-h-screen pt-20">
       {/* Header */}
@@ -178,26 +183,7 @@ export default function About() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {team.map((member, index) => (
-              <div key={index} className="card-elevated p-8 hover:scale-105 transition-transform duration-300">
-                <div className="flex items-start gap-6">
-                  <div className="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-bold text-xl">
-                      {member.name.split(' ').map(n => n[0]).join('')}
-                    </span>
-                  </div>
-                  
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold mb-2">{member.name}</h3>
-                    <p className="text-primary font-semibold mb-2">{member.role}</p>
-                    <p className="text-sm text-muted-foreground mb-4">{member.experience}</p>
-                    <p className="text-muted-foreground">{member.description}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <TeamMemberEditor isAdmin={isAdmin} />
         </div>
       </section>
 
@@ -211,24 +197,7 @@ export default function About() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-gradient mb-2">500+</div>
-              <div className="text-muted-foreground">Students Trained</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-gradient mb-2">95%</div>
-              <div className="text-muted-foreground">Job Placement Rate</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-gradient mb-2">150+</div>
-              <div className="text-muted-foreground">Business Clients</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-gradient mb-2">50+</div>
-              <div className="text-muted-foreground">Real Projects Built</div>
-            </div>
-          </div>
+          <ImpactStatsEditor isAdmin={isAdmin} />
         </div>
       </section>
 

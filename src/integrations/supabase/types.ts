@@ -158,6 +158,36 @@ export type Database = {
         }
         Relationships: []
       }
+      impact_stats: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          label: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          label: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          label?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       learning_materials: {
         Row: {
           category: string
@@ -632,6 +662,42 @@ export type Database = {
           phone?: string | null
           roll_no?: string
           status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          created_at: string
+          description: string
+          display_order: number
+          experience: string
+          id: string
+          is_active: boolean
+          name: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          display_order?: number
+          experience: string
+          id?: string
+          is_active?: boolean
+          name: string
+          role: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          display_order?: number
+          experience?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          role?: string
           updated_at?: string
         }
         Relationships: []
