@@ -57,6 +57,15 @@ export default function ImpactStatsEditor({ isAdmin }: ImpactStatsEditorProps) {
   }
 
   const handleSave = async () => {
+    if (!formData.label || !formData.value) {
+      toast({
+        title: "Error",
+        description: "Please fill in both label and value fields",
+        variant: "destructive"
+      })
+      return
+    }
+
     try {
       if (editingId) {
         const { error } = await supabase

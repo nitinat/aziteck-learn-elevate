@@ -62,6 +62,15 @@ export default function TeamMemberEditor({ isAdmin }: TeamMemberEditorProps) {
   }
 
   const handleSave = async () => {
+    if (!formData.name || !formData.role || !formData.experience || !formData.description) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      })
+      return
+    }
+
     try {
       if (editingId) {
         const { error } = await supabase
@@ -181,7 +190,7 @@ export default function TeamMemberEditor({ isAdmin }: TeamMemberEditorProps) {
               rows={3}
             />
             <div className="flex gap-2">
-              <Button onClick={handleSave} disabled={!formData.name || !formData.role}>
+              <Button onClick={handleSave} disabled={!formData.name || !formData.role || !formData.experience || !formData.description}>
                 <Save className="w-4 h-4 mr-2" />
                 Save
               </Button>
