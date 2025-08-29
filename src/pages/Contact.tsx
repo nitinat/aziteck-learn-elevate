@@ -4,8 +4,11 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ContactInfoEditor } from "@/components/admin/ContactInfoEditor"
+import { useAdmin } from "@/hooks/useAdmin"
+import { useState } from "react"
 
-const contactInfo = [
+const defaultContactInfo = [
   {
     icon: Mail,
     title: "Email Us",
@@ -43,6 +46,12 @@ const inquiryTypes = [
 ]
 
 export default function Contact() {
+  const { isAdmin } = useAdmin()
+  const [contactInfo, setContactInfo] = useState(defaultContactInfo)
+
+  const handleContactInfoUpdate = (updatedInfo: typeof defaultContactInfo) => {
+    setContactInfo(updatedInfo)
+  }
   return (
     <div className="min-h-screen pt-20">
       {/* Header */}
@@ -127,7 +136,15 @@ export default function Contact() {
             {/* Contact Information */}
             <div className="space-y-8">
               <div>
-                <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold">Contact Information</h2>
+                  {isAdmin && (
+                    <ContactInfoEditor 
+                      contactInfo={contactInfo}
+                      onUpdate={handleContactInfoUpdate}
+                    />
+                  )}
+                </div>
                 <div className="space-y-6">
                   {contactInfo.map((info, index) => (
                     <div key={index} className="flex items-start gap-4">
