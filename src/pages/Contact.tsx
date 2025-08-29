@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ContactInfoEditor } from "@/components/admin/ContactInfoEditor"
 import { useAdmin } from "@/hooks/useAdmin"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
 import { useState } from "react"
 
 const defaultContactInfo = [
@@ -47,10 +49,73 @@ const inquiryTypes = [
 
 export default function Contact() {
   const { isAdmin } = useAdmin()
+  const { toast } = useToast()
   const [contactInfo, setContactInfo] = useState(defaultContactInfo)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    company: "",
+    inquiryType: "",
+    message: ""
+  })
 
   const handleContactInfoUpdate = (updatedInfo: typeof defaultContactInfo) => {
     setContactInfo(updatedInfo)
+  }
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.inquiryType || !formData.message) {
+      toast({
+        title: "Missing Required Fields",
+        description: "Please fill in all required fields marked with *",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      const { error } = await supabase.functions.invoke('send-contact-email', {
+        body: formData
+      })
+
+      if (error) throw error
+
+      toast({
+        title: "Message Sent Successfully!",
+        description: "Thank you for contacting us. We'll get back to you within 24 hours."
+      })
+
+      // Reset form
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        company: "",
+        inquiryType: "",
+        message: ""
+      })
+    } catch (error) {
+      console.error('Error sending message:', error)
+      toast({
+        title: "Error Sending Message",
+        description: "Something went wrong. Please try again or contact us directly.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
   return (
     <div className="min-h-screen pt-20">
@@ -74,36 +139,71 @@ export default function Contact() {
             {/* Contact Form */}
             <div className="card-elevated p-8">
               <h2 className="text-2xl font-bold mb-6">Send Us a Message</h2>
-              <form className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="firstName">First Name *</Label>
-                    <Input id="firstName" placeholder="John" className="mt-2" />
+                    <Input 
+                      id="firstName" 
+                      placeholder="John" 
+                      className="mt-2"
+                      value={formData.firstName}
+                      onChange={(e) => handleInputChange("firstName", e.target.value)}
+                      required
+                    />
                   </div>
                   <div>
                     <Label htmlFor="lastName">Last Name *</Label>
-                    <Input id="lastName" placeholder="Doe" className="mt-2" />
+                    <Input 
+                      id="lastName" 
+                      placeholder="Doe" 
+                      className="mt-2"
+                      value={formData.lastName}
+                      onChange={(e) => handleInputChange("lastName", e.target.value)}
+                      required
+                    />
                   </div>
                 </div>
 
                 <div>
                   <Label htmlFor="email">Email Address *</Label>
-                  <Input id="email" type="email" placeholder="john@example.com" className="mt-2" />
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="john@example.com" 
+                    className="mt-2"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    required
+                  />
                 </div>
 
                 <div>
                   <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" type="tel" placeholder="+1 (555) 123-4567" className="mt-2" />
+                  <Input 
+                    id="phone" 
+                    type="tel" 
+                    placeholder="+1 (555) 123-4567" 
+                    className="mt-2"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange("phone", e.target.value)}
+                  />
                 </div>
 
                 <div>
                   <Label htmlFor="company">Company/Organization</Label>
-                  <Input id="company" placeholder="Acme Inc." className="mt-2" />
+                  <Input 
+                    id="company" 
+                    placeholder="Acme Inc." 
+                    className="mt-2"
+                    value={formData.company}
+                    onChange={(e) => handleInputChange("company", e.target.value)}
+                  />
                 </div>
 
                 <div>
                   <Label htmlFor="inquiryType">Inquiry Type *</Label>
-                  <Select>
+                  <Select value={formData.inquiryType} onValueChange={(value) => handleInputChange("inquiryType", value)}>
                     <SelectTrigger className="mt-2">
                       <SelectValue placeholder="Select inquiry type" />
                     </SelectTrigger>
@@ -123,12 +223,15 @@ export default function Contact() {
                     id="message" 
                     placeholder="Tell us about your goals, questions, or how we can help you..."
                     className="mt-2 min-h-[120px]"
+                    value={formData.message}
+                    onChange={(e) => handleInputChange("message", e.target.value)}
+                    required
                   />
                 </div>
 
-                <Button type="submit" size="lg" className="btn-hero w-full">
+                <Button type="submit" size="lg" className="btn-hero w-full" disabled={isSubmitting}>
                   <Send className="w-4 h-4 mr-2" />
-                  Send Message
+                  {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
               </form>
             </div>
