@@ -8,7 +8,15 @@ import { ContactInfoEditor } from "@/components/admin/ContactInfoEditor"
 import { useAdmin } from "@/hooks/useAdmin"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+
+// Icon mapping for database storage
+const iconMap = {
+  Mail,
+  Phone,
+  MapPin,
+  Clock
+}
 
 const defaultContactInfo = [
   {
@@ -52,6 +60,7 @@ export default function Contact() {
   const { toast } = useToast()
   const [contactInfo, setContactInfo] = useState(defaultContactInfo)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -62,8 +71,84 @@ export default function Contact() {
     message: ""
   })
 
-  const handleContactInfoUpdate = (updatedInfo: typeof defaultContactInfo) => {
-    setContactInfo(updatedInfo)
+  // Load contact info from database
+  useEffect(() => {
+    const loadContactInfo = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('contact_info')
+          .select('*')
+          .eq('is_active', true)
+          .order('display_order')
+
+        if (error) {
+          console.error('Error loading contact info:', error)
+          return
+        }
+
+        if (data && data.length > 0) {
+          const formattedData = data.map(item => ({
+            icon: iconMap[item.icon_name as keyof typeof iconMap] || Mail,
+            title: item.title,
+            content: item.content,
+            description: item.description,
+            id: item.id
+          }))
+          setContactInfo(formattedData)
+        }
+      } catch (error) {
+        console.error('Error loading contact info:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadContactInfo()
+  }, [])
+
+  const handleContactInfoUpdate = async (updatedInfo: typeof defaultContactInfo) => {
+    try {
+      // Update each contact info item in the database
+      for (const info of updatedInfo) {
+        const iconName = Object.keys(iconMap).find(
+          key => iconMap[key as keyof typeof iconMap] === info.icon
+        ) || 'Mail'
+
+        const { error } = await supabase
+          .from('contact_info')
+          .update({
+            title: info.title,
+            content: info.content,
+            description: info.description,
+            icon_name: iconName,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', (info as any).id)
+
+        if (error) {
+          console.error('Error updating contact info:', error)
+          toast({
+            title: "Error",
+            description: "Failed to update contact information",
+            variant: "destructive"
+          })
+          return
+        }
+      }
+
+      setContactInfo(updatedInfo)
+      toast({
+        title: "Success",
+        description: "Contact information updated successfully"
+      })
+    } catch (error) {
+      console.error('Error updating contact info:', error)
+      toast({
+        title: "Error",
+        description: "Failed to update contact information",
+        variant: "destructive"
+      })
+    }
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -249,18 +334,22 @@ export default function Contact() {
                   )}
                 </div>
                 <div className="space-y-6">
-                  {contactInfo.map((info, index) => (
-                    <div key={index} className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-xl flex items-center justify-center flex-shrink-0">
-                        <info.icon className="w-6 h-6 text-white" />
+                  {loading ? (
+                    <div className="text-center">Loading contact information...</div>
+                  ) : (
+                    contactInfo.map((info, index) => (
+                      <div key={index} className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-xl flex items-center justify-center flex-shrink-0">
+                          <info.icon className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold mb-1">{info.title}</h3>
+                          <p className="text-primary font-medium mb-1">{info.content}</p>
+                          <p className="text-sm text-muted-foreground">{info.description}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold mb-1">{info.title}</h3>
-                        <p className="text-primary font-medium mb-1">{info.content}</p>
-                        <p className="text-sm text-muted-foreground">{info.description}</p>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
 
