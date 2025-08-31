@@ -37,7 +37,7 @@ export function Navigation() {
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2 group">
           <img 
-            src="/lovable-uploads/d22113df-65c5-4605-8cfa-680327bafd9f.png" 
+            src="/lovable-uploads/d0487380-9f5d-4ca4-8cf4-4aa4929cb33a.png" 
             alt="Aziteck Logo" 
             className="w-8 h-8 group-hover:scale-110 transition-transform duration-300"
           />
