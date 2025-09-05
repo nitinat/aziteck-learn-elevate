@@ -227,21 +227,14 @@ export default function Demos() {
                    <div className={`absolute inset-0 flex items-center justify-center ${demo.image && demo.image !== "/api/placeholder/600/400" ? 'hidden' : ''}`}>
                      <Database className="w-16 h-16 text-primary/60" />
                    </div>
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    {demo.videoUrl ? (
-                      <Button size="lg" variant="secondary" className="animate-scale-in" asChild>
-                        <a href={demo.videoUrl} target="_blank" rel="noopener noreferrer">
-                          <Play className="w-5 h-5 mr-2" />
-                          Watch Video
-                        </a>
-                      </Button>
-                    ) : (
-                      <Button size="lg" variant="secondary" className="animate-scale-in">
-                        <Play className="w-5 h-5 mr-2" />
-                        Try Demo
-                      </Button>
-                    )}
-                  </div>
+                   <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                     <Button size="lg" variant="secondary" className="animate-scale-in" asChild>
+                       <a href={demo.videoUrl || demo.demoUrl} target="_blank" rel="noopener noreferrer">
+                         <Play className="w-5 h-5 mr-2" />
+                         {demo.videoUrl ? 'Watch Video' : 'Try Demo'}
+                       </a>
+                     </Button>
+                   </div>
                 </div>
                 
                 <div className="p-6">
@@ -292,21 +285,21 @@ export default function Demos() {
                     </ul>
                   </div>
                   
-                  {/* Action buttons */}
-                  <div className="flex gap-2">
-                    <Button size="sm" className="flex-1 btn-hero" asChild>
-                      <a href={demo.demoUrl} target="_blank" rel="noopener noreferrer">
-                        <Play className="w-4 h-4 mr-2" />
-                        Live Demo
-                      </a>
-                    </Button>
-                    <Button size="sm" variant="outline" className="flex-1" asChild>
-                      <a href={demo.codeUrl} target="_blank" rel="noopener noreferrer">
-                        <Code className="w-4 h-4 mr-2" />
-                        View Code
-                      </a>
-                    </Button>
-                  </div>
+                   {/* Action buttons */}
+                   <div className="flex gap-2">
+                     <Button size="sm" className="flex-1 btn-hero" asChild>
+                       <a href={demo.videoUrl || demo.demoUrl} target="_blank" rel="noopener noreferrer">
+                         <Play className="w-4 h-4 mr-2" />
+                         {demo.videoUrl ? 'Watch Video' : 'Live Demo'}
+                       </a>
+                     </Button>
+                     <Button size="sm" variant="outline" className="flex-1" asChild>
+                       <a href={demo.codeUrl} target="_blank" rel="noopener noreferrer">
+                         <Code className="w-4 h-4 mr-2" />
+                         View Code
+                       </a>
+                     </Button>
+                   </div>
                 </div>
               </div>
               ))}
