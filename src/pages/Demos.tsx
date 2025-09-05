@@ -286,17 +286,11 @@ export default function Demos() {
                   </div>
                   
                    {/* Action buttons */}
-                   <div className="flex gap-2">
-                     <Button size="sm" className="flex-1 btn-hero" asChild>
+                   <div className="flex">
+                     <Button size="sm" className="w-full btn-hero" asChild>
                        <a href={demo.videoUrl || demo.demoUrl} target="_blank" rel="noopener noreferrer">
                          <Play className="w-4 h-4 mr-2" />
                          {demo.videoUrl ? 'Watch Video' : 'Live Demo'}
-                       </a>
-                     </Button>
-                     <Button size="sm" variant="outline" className="flex-1" asChild>
-                       <a href={demo.codeUrl} target="_blank" rel="noopener noreferrer">
-                         <Code className="w-4 h-4 mr-2" />
-                         View Code
                        </a>
                      </Button>
                    </div>
