@@ -1,9 +1,10 @@
 import { useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
-import { Menu, X, Zap, LogOut, User } from "lucide-react"
+import { Menu, X, Zap, LogOut, User, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "./theme-toggle"
 import { useAuth } from "@/hooks/useAuth"
+import { useAdmin } from "@/hooks/useAdmin"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +26,7 @@ export function Navigation() {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
+  const { isAdmin } = useAdmin()
 
   const handleSignOut = async () => {
     await signOut()
@@ -73,6 +75,14 @@ export function Navigation() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin" className="w-full">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Admin Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
@@ -129,10 +139,18 @@ export function Navigation() {
             ))}
             <div className="flex flex-col space-y-2 pt-4 border-t border-border">
               {user ? (
-                <>
+               <>
                   <div className="text-sm text-muted-foreground px-2">
                     {user.user_metadata?.full_name || user.email}
                   </div>
+                  {isAdmin && (
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to="/admin">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Admin Dashboard
+                      </Link>
+                    </Button>
+                  )}
                   <Button variant="outline" size="sm" onClick={handleSignOut}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out

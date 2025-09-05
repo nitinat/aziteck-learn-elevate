@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      aziteck_id_counters: {
+        Row: {
+          created_at: string
+          id: string
+          last_number: number
+          role: Database["public"]["Enums"]["aziteck_role"]
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_number?: number
+          role: Database["public"]["Enums"]["aziteck_role"]
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_number?: number
+          role?: Database["public"]["Enums"]["aziteck_role"]
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      aziteck_users: {
+        Row: {
+          aziteck_id: string
+          contact_number: string | null
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean
+          name: string
+          password_hash: string
+          role: Database["public"]["Enums"]["aziteck_role"]
+          status: Database["public"]["Enums"]["user_status"]
+          updated_at: string
+          year_of_joining: number
+        }
+        Insert: {
+          aziteck_id: string
+          contact_number?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          is_active?: boolean
+          name: string
+          password_hash: string
+          role: Database["public"]["Enums"]["aziteck_role"]
+          status?: Database["public"]["Enums"]["user_status"]
+          updated_at?: string
+          year_of_joining: number
+        }
+        Update: {
+          aziteck_id?: string
+          contact_number?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          password_hash?: string
+          role?: Database["public"]["Enums"]["aziteck_role"]
+          status?: Database["public"]["Enums"]["user_status"]
+          updated_at?: string
+          year_of_joining?: number
+        }
+        Relationships: []
+      }
       contact_info: {
         Row: {
           content: string
@@ -185,6 +257,45 @@ export type Database = {
           label?: string
           updated_at?: string
           value?: string
+        }
+        Relationships: []
+      }
+      internship_program_banner: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          subtitle: string
+          title: string
+          updated_at: string
+          video_description: string | null
+          video_title: string | null
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          subtitle?: string
+          title?: string
+          updated_at?: string
+          video_description?: string | null
+          video_title?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          subtitle?: string
+          title?: string
+          updated_at?: string
+          video_description?: string | null
+          video_title?: string | null
+          video_url?: string | null
         }
         Relationships: []
       }
@@ -427,6 +538,42 @@ export type Database = {
           total_questions?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      role_permissions: {
+        Row: {
+          app_description: string | null
+          app_icon: string | null
+          app_name: string
+          app_url: string | null
+          created_at: string
+          id: string
+          is_accessible: boolean
+          role: Database["public"]["Enums"]["aziteck_role"]
+          updated_at: string
+        }
+        Insert: {
+          app_description?: string | null
+          app_icon?: string | null
+          app_name: string
+          app_url?: string | null
+          created_at?: string
+          id?: string
+          is_accessible?: boolean
+          role: Database["public"]["Enums"]["aziteck_role"]
+          updated_at?: string
+        }
+        Update: {
+          app_description?: string | null
+          app_icon?: string | null
+          app_name?: string
+          app_url?: string | null
+          created_at?: string
+          id?: string
+          is_accessible?: boolean
+          role?: Database["public"]["Enums"]["aziteck_role"]
+          updated_at?: string
         }
         Relationships: []
       }
@@ -805,6 +952,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_aziteck_id: {
+        Args: {
+          join_year: number
+          user_role: Database["public"]["Enums"]["aziteck_role"]
+        }
+        Returns: string
+      }
+      get_user_apps: {
+        Args: { user_role: Database["public"]["Enums"]["aziteck_role"] }
+        Returns: string[]
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -826,6 +984,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user" | "student"
+      aziteck_role: "associate" | "student" | "employee" | "industry_partner"
+      user_status: "pending_approval" | "active" | "rejected" | "suspended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -954,6 +1114,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "student"],
+      aziteck_role: ["associate", "student", "employee", "industry_partner"],
+      user_status: ["pending_approval", "active", "rejected", "suspended"],
     },
   },
 } as const
