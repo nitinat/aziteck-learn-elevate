@@ -6,118 +6,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
 import DemoVideoManager from "@/components/admin/DemoVideoManager"
 
-const demos = [
-  {
-    title: "Employee Management Dashboard",
-    description: "Complete HR management system with employee records, payroll, attendance tracking, and performance analytics.",
-    category: "Business Intelligence",
-    technologies: ["React", "Node.js", "PostgreSQL", "Chart.js"],
-    features: [
-      "Employee profile management",
-      "Automated payroll processing", 
-      "Real-time attendance tracking",
-      "Performance analytics dashboard",
-      "Leave management system"
-    ],
-    image: "/api/placeholder/600/400",
-    demoUrl: "#",
-    codeUrl: "#",
-    videoUrl: null,
-    icon: Users
-  },
-  {
-    title: "School Management System",
-    description: "Comprehensive educational platform for managing students, courses, grades, and administrative tasks.",
-    category: "Education Technology",
-    technologies: ["React", "Express.js", "MongoDB", "Socket.io"],
-    features: [
-      "Student enrollment system",
-      "Course and curriculum management",
-      "Grade book and reporting",
-      "Parent-teacher communication",
-      "Fee management"
-    ],
-    image: "/api/placeholder/600/400",
-    demoUrl: "#",
-    codeUrl: "#",
-    videoUrl: null,
-    icon: BookOpen
-  },
-  {
-    title: "ERP Enterprise Portal",
-    description: "Full-scale Enterprise Resource Planning system integrating finance, inventory, sales, and customer management.",
-    category: "Enterprise Software",
-    technologies: ["React", "Spring Boot", "MySQL", "Redis"],
-    features: [
-      "Financial management module",
-      "Inventory tracking system",
-      "Sales pipeline management", 
-      "Customer relationship management",
-      "Reporting and analytics"
-    ],
-    image: "/api/placeholder/600/400",
-    demoUrl: "#",
-    codeUrl: "#",
-    videoUrl: null,
-    icon: Building2
-  },
-  {
-    title: "AI-Powered Analytics Dashboard",
-    description: "Machine learning dashboard providing predictive analytics, data visualization, and automated insights.",
-    category: "Artificial Intelligence",
-    technologies: ["Python", "TensorFlow", "React", "FastAPI"],
-    features: [
-      "Predictive modeling",
-      "Real-time data visualization",
-      "Automated report generation",
-      "Machine learning insights",
-      "Custom AI model deployment"
-    ],
-    image: "/api/placeholder/600/400",
-    demoUrl: "#",
-    codeUrl: "#",
-    videoUrl: null,
-    icon: BarChart3
-  },
-  {
-    title: "Smart Inventory System",
-    description: "AI-driven inventory management with demand forecasting, automatic reordering, and supply chain optimization.",
-    category: "Supply Chain",
-    technologies: ["React", "Python", "scikit-learn", "PostgreSQL"],
-    features: [
-      "Demand forecasting algorithms",
-      "Automated reorder points",
-      "Supplier management",
-      "Warehouse optimization",
-      "Cost analysis tools"
-    ],
-    image: "/api/placeholder/600/400",
-    demoUrl: "#",
-    codeUrl: "#",
-    videoUrl: null,
-    icon: Database
-  },
-  {
-    title: "Customer Service Chatbot",
-    description: "Intelligent conversational AI for customer support with natural language processing and learning capabilities.",
-    category: "Natural Language Processing",
-    technologies: ["Python", "NLP", "React", "WebSocket"],
-    features: [
-      "Natural language understanding",
-      "Multi-language support",
-      "Sentiment analysis",
-      "Escalation to human agents",
-      "Knowledge base integration"
-    ],
-    image: "/api/placeholder/600/400",
-    demoUrl: "#",
-    codeUrl: "#",
-    videoUrl: null,
-    icon: Users
-  }
-]
-
-const categories = ["All", "Business Intelligence", "Education Technology", "Enterprise Software", "Artificial Intelligence", "Supply Chain", "Natural Language Processing"]
+// Categories will be dynamically generated from database demos
 
 interface DemoVideo {
   id: string
@@ -171,8 +60,8 @@ export default function Demos() {
     }
   }
 
-  // Combine static demos with database demos
-  const allDemos = [...demos, ...dbDemos.map(dbDemo => ({
+  // Only use database demos
+  const allDemos = dbDemos.map(dbDemo => ({
     title: dbDemo.title,
     description: dbDemo.description || "",
     category: dbDemo.category,
@@ -183,15 +72,12 @@ export default function Demos() {
     codeUrl: dbDemo.code_url || "#",
     videoUrl: dbDemo.video_url,
     icon: Database // Default icon for DB demos
-  }))]
+  }))
 
-  // Get all categories including database demo categories
+  // Get all categories from database demos
   const allCategories = [
     "All",
-    ...new Set([
-      ...categories.slice(1), // Exclude "All" from static categories
-      ...dbDemos.map(demo => demo.category)
-    ])
+    ...new Set(dbDemos.map(demo => demo.category))
   ]
 
   // Filter demos based on selected category
@@ -323,24 +209,24 @@ export default function Demos() {
                 )}
                 
                 {/* Demo Image/Preview */}
-                <div className="relative bg-gradient-to-br from-primary/10 to-secondary/10 h-48 overflow-hidden">
-                  {demo.image && demo.image !== "/api/placeholder/600/400" ? (
-                    <img 
-                      src={demo.image} 
-                      alt={demo.title}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        // Fallback to icon if image fails to load
-                        const img = e.currentTarget as HTMLImageElement;
-                        const iconDiv = img.nextElementSibling as HTMLElement;
-                        img.style.display = 'none';
-                        if (iconDiv) iconDiv.style.display = 'flex';
-                      }}
-                    />
-                  ) : null}
-                  <div className={`absolute inset-0 flex items-center justify-center ${demo.image && demo.image !== "/api/placeholder/600/400" ? 'hidden' : ''}`}>
-                    <demo.icon className="w-16 h-16 text-primary/60" />
-                  </div>
+                 <div className="relative bg-gradient-to-br from-primary/10 to-secondary/10 h-48 overflow-hidden">
+                   {demo.image && demo.image !== "/api/placeholder/600/400" ? (
+                     <img 
+                       src={demo.image} 
+                       alt={demo.title}
+                       className="w-full h-full object-cover"
+                       onError={(e) => {
+                         // Fallback to icon if image fails to load
+                         const img = e.currentTarget as HTMLImageElement;
+                         const iconDiv = img.nextElementSibling as HTMLElement;
+                         img.style.display = 'none';
+                         if (iconDiv) iconDiv.style.display = 'flex';
+                       }}
+                     />
+                   ) : null}
+                   <div className={`absolute inset-0 flex items-center justify-center ${demo.image && demo.image !== "/api/placeholder/600/400" ? 'hidden' : ''}`}>
+                     <Database className="w-16 h-16 text-primary/60" />
+                   </div>
                   <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     {demo.videoUrl ? (
                       <Button size="lg" variant="secondary" className="animate-scale-in" asChild>
