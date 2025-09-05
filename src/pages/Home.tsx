@@ -30,6 +30,7 @@ export default function Home() {
 
         if (error && error.code !== 'PGRST116') {
           console.error('Error fetching banner data:', error)
+          console.log('Banner fetch result:', { data, error })
           return
         }
 
